@@ -1,0 +1,24 @@
+{
+  "name": "geolytica-skills",
+  "owner": {
+    "name": "Geolytica Inc.",
+    "email": "ervin.ruci@geolytica.com"
+  },
+  "metadata": {
+    "description": "Agent skills for the Geocoder.ca and Geocode.xyz geocoding APIs",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "geolytica",
+      "source": "./",
+      "description": "Geocode, reverse geocode, validate and geoparse addresses with Geocoder.ca (Canada/USA) and Geocode.xyz (worldwide), plus a Canadian address autocomplete widget",
+      "version": "0.1.0",
+      "author": { "name": "Geolytica Inc." },
+      "homepage": "https://geocoder.ca",
+      "repository": "https://github.com/geocode-xyz/geolytica-skills",
+      "license": "MIT",
+      "keywords": ["geocoding", "reverse-geocoding", "geoparsing", "address-validation", "postal-codes", "canada", "autocomplete"]
+    }
+  ]
+}
