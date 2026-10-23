@@ -38,4 +38,4 @@ else
   echo "geocoder_ca.sh: GEOCODER_CA_AUTH not set; using the free throttled port" >&2
 fi
 
-exec curl -sS --max-time 60 "${method[@]}" 'https://geocoder.ca/' "${args[@]}"
+exec curl -sS --max-time 60 ${method[@]+"${method[@]}"} 'https://geocoder.ca/' "${args[@]}"
