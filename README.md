@@ -2,6 +2,10 @@
 
 Agent skills for working with the Geolytica geocoding services: [Geocoder.ca](https://geocoder.ca) (Canada and the USA) and [Geocode.xyz](https://geocode.xyz) (worldwide). They give an AI coding agent what it needs to integrate correctly: endpoints, parameters, response quirks, error handling, rate limits and per-language examples.
 
+**Quick install (Claude Code):**
+
+    /plugin install geolytica --marketplace geocode-xyz/geolytica-skills
+    
 The skills are plain markdown files, so any agent that can read documentation can use them. Claude Code gets first-class installation through its plugin system; see [install.md](install.md) for Claude Code, Gemini CLI, Codex and other agents.
 
 ## Skills
