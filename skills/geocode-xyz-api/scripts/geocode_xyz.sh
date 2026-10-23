@@ -36,4 +36,4 @@ else
   echo "geocode_xyz.sh: GEOCODE_XYZ_AUTH not set; using the shared free throttled port" >&2
 fi
 
-exec curl -sS --max-time 60 "${method[@]}" 'https://geocode.xyz/' "${args[@]}"
+exec curl -sS --max-time 60 ${method[@]+"${method[@]}"} 'https://geocode.xyz/' "${args[@]}"
