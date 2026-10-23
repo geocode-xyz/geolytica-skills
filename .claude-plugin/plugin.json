@@ -1,0 +1,14 @@
+{
+  "name": "geolytica",
+  "version": "0.1.0",
+  "description": "Geocode, reverse geocode, validate and geoparse addresses with Geocoder.ca (Canada/USA) and Geocode.xyz (worldwide), plus a Canadian address autocomplete widget",
+  "author": {
+    "name": "Geolytica Inc.",
+    "email": "ervin.ruci@geolytica.com",
+    "url": "https://geocoder.ca"
+  },
+  "homepage": "https://geocoder.ca",
+  "repository": "https://github.com/geocode-xyz/geolytica-skills",
+  "license": "MIT",
+  "keywords": ["geocoding", "reverse-geocoding", "geoparsing", "address-validation", "postal-codes", "canada", "autocomplete"]
+}
