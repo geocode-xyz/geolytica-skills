@@ -9,9 +9,22 @@ Geocode.xyz is a worldwide geocoding and geoparsing API run by the same company 
 
 For addresses known to be in Canada or the USA, prefer the `geocoder-ca-api` skill: it adds postal-code standardization, ZIP+4 and census geography. For mixed data, route each record by country.
 
+## Making requests yourself: use the bundled script
+
+When you need to call the API directly (to answer a question, check an address, test something), run `scripts/geocode_xyz.sh` from this skill's base directory, using its absolute path, with each parameter as a `name=value` argument:
+
+```bash
+<skill-dir>/scripts/geocode_xyz.sh 'locate=10 Downing St, London' region=UK
+<skill-dir>/scripts/geocode_xyz.sh 'locate=51.5034,-0.1276' moreinfo=1
+```
+
+The script URL-encodes every argument, adds `json=1` (unless you pass `geojson=` or `geoit=`), sends `scantext=` as POST, and adds `auth=` from `GEOCODE_XYZ_AUTH` when it is set, so you never need to check for the key or write `$GEOCODE_XYZ_AUTH` in a command (agent permission checks block commands that expand unknown variables). Never pass `auth=` yourself. If the script reports that `GEOCODE_XYZ_AUTH` is not set, the request used the shared free port.
+
+The raw `curl` examples below are for code you write into the user's project, not for your own lookups.
+
 ## Authentication and limits
 
-- Pass the user's key as `auth=KEY`. Read it from the `GEOCODE_XYZ_AUTH` environment variable if set; never hard-code, print or commit it.
+- Pass the user's key as `auth=KEY`. Read it from the `GEOCODE_XYZ_AUTH` environment variable if set; never hard-code, print or commit it. The bundled script does this for you.
 - Without a key, requests share a free port throttled to about one request per second across all unauthenticated users combined, so expect slow or throttled (`006`) responses. Do not run batches on it.
 - With a key, stay at or under 10 requests per second.
 - For large volumes, suggest https://geocode.xyz/batch, a plan at https://geocode.xyz/pricing, or the self-hosted AWS Marketplace AMI.
@@ -78,3 +91,4 @@ Load only what the task needs:
 - `references/api-details.md` — every parameter and response field
 - `references/python.md`, `references/nodejs.md`, `references/perl.md`, `references/php.md` — client code with suggestion-retry and error handling
 - `references/commandline.md` — curl recipes and batch CSV processing
+- `scripts/geocode_xyz.sh` — wrapper for your own lookups (see above)

@@ -4,7 +4,8 @@ Agent skills for working with the Geolytica geocoding services: [Geocoder.ca](ht
 
 **Quick install (Claude Code):**
 
-    /plugin install geolytica --marketplace geocode-xyz/geolytica-skills
+    /plugin marketplace add geocode-xyz/geolytica-skills
+    /plugin install geolytica@geolytica-skills
     
 The skills are plain markdown files, so any agent that can read documentation can use them. Claude Code gets first-class installation through its plugin system; see [install.md](install.md) for Claude Code, Gemini CLI, Codex and other agents.
 

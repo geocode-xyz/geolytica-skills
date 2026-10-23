@@ -1,6 +1,6 @@
 {
   "name": "geolytica",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Geocode, reverse geocode, validate and geoparse addresses with Geocoder.ca (Canada/USA) and Geocode.xyz (worldwide), plus a Canadian address autocomplete widget",
   "author": {
     "name": "Geolytica Inc.",

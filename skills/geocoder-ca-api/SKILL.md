@@ -9,9 +9,22 @@ Geocoder.ca is a North American (Canada + USA) geocoding API. Every function use
 
 For locations outside Canada and the USA, use the `geocode-xyz-api` skill (https://geocode.xyz) instead. For an as-you-type address field in a web page, use the `geocoder-ca-autocomplete` skill.
 
+## Making requests yourself: use the bundled script
+
+When you need to call the API directly (to answer a question, check an address, test something), run `scripts/geocoder_ca.sh` from this skill's base directory, using its absolute path, with each parameter as a `name=value` argument:
+
+```bash
+<skill-dir>/scripts/geocoder_ca.sh 'locate=350 5th Ave, New York, NY' standard=1 showpostal=1
+<skill-dir>/scripts/geocoder_ca.sh latt=45.4215 longt=-75.6972 reverse=1 allna=1
+```
+
+The script URL-encodes every argument, adds `geoit=XML&json=1`, and adds `auth=` from `GEOCODER_CA_AUTH` when it is set, so you never need to check for the token or write `$GEOCODER_CA_AUTH` in a command (agent permission checks block commands that expand unknown variables). Never pass `auth=` yourself. If the script reports that `GEOCODER_CA_AUTH` is not set, the request used the free port.
+
+The raw `curl` examples below are for code you write into the user's project, not for your own lookups.
+
 ## Authentication and limits
 
-- Pass the user's token as `auth=TOKEN`. Read it from the `GEOCODER_CA_AUTH` environment variable if set; never hard-code, print or commit it.
+- Pass the user's token as `auth=TOKEN`. Read it from the `GEOCODER_CA_AUTH` environment variable if set; never hard-code, print or commit it. The bundled script does this for you.
 - Without a token, requests use the free throttled port. Keep to one request at a time with at least a one-second pause, and expect HTTP 429 (error code `006`) if you go faster. On 429, wait (honour `Retry-After` if present) and retry once; if it persists, tell the user a token is needed (https://geocoder.ca/pricing).
 - With a token, one successful lookup costs one credit. `showaddrs`, `batchpostal`, `postalinpolygon` and `censusdatafromdauid` bill per returned item, so always set `limit` and confirm with the user before large premium requests.
 
@@ -91,3 +104,4 @@ Load only what the task needs:
 - `references/api-details.md` — every parameter and response field, grouped by task
 - `references/python.md`, `references/nodejs.md`, `references/perl.md`, `references/php.md` — idiomatic client code with error handling
 - `references/commandline.md` — curl recipes and batch CSV processing
+- `scripts/geocoder_ca.sh` — wrapper for your own lookups (see above)
