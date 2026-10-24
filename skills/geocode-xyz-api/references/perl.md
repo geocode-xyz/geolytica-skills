@@ -20,7 +20,9 @@ sub gxyz_call {
     $p{auth} = $AUTH if $AUTH;
     my $res = $http->post_form($BASE, \%p);
     die "HTTP $res->{status}\n" unless $res->{success};
-    return decode_json($res->{content});
+    # Street autocomplete is Latin-1 despite its UTF-8 header.
+    return eval { decode_json($res->{content}) }
+        || JSON::PP->new->latin1->decode($res->{content});
 }
 
 sub geocode {
@@ -30,7 +32,8 @@ sub geocode {
     if (my $e = $d->{error}) {
         my $s = $d->{suggestion} || {};
         return geocode($s->{locate}, $s->{region} || $region, 1)
-            if $e->{code} eq '008' && $s->{locate} && !$retried;
+            # locate can be {} (a true hashref), so require a plain string
+            if $e->{code} eq '008' && $s->{locate} && !ref $s->{locate} && !$retried;
         return undef if $e->{code} eq '008';
         die "geocode.xyz $e->{code}: $e->{description}\n";
     }
@@ -38,6 +41,8 @@ sub geocode {
     my $std = $d->{standard} || {};
     my $get = sub { my ($k, $alt) = @_; clean($std->{$k}) || clean($d->{$alt // $k}) };
     return undef unless $d->{latt} && $d->{latt} != 0;
+    # confidence 0 means no match, even with coordinates
+    return undef unless ($get->('confidence') || 0) > 0;
     return {
         lat          => 0 + $d->{latt},
         lon          => 0 + $d->{longt},

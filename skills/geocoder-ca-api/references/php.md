@@ -28,7 +28,9 @@ function gca_call(array $params, string $method = 'GET'): array {
         $data = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         if (!empty($data['error'])) {
             throw new RuntimeException(
-                "geocoder.ca {$data['error']['code']}: {$data['error']['message']}"
+                // Most errors use "description"; 006 (throttled) uses "message".
+                "geocoder.ca {$data['error']['code']}: "
+                . ($data['error']['description'] ?? $data['error']['message'] ?? '')
             );
         }
         return $data;

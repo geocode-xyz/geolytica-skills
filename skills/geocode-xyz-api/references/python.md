@@ -1,6 +1,7 @@
 # Geocode.xyz from Python
 
 ```python
+import json
 import os
 import time
 import requests
@@ -30,7 +31,11 @@ def _call(params, method="GET"):
     else:
         r = requests.get(BASE, params=params, timeout=60)
     r.raise_for_status()
-    return r.json()
+    # Street autocomplete is Latin-1 despite its UTF-8 header.
+    try:
+        return json.loads(r.content.decode("utf-8"))
+    except UnicodeDecodeError:
+        return json.loads(r.content.decode("latin-1"))
 
 
 def geocode(location, region=None, min_confidence=0.8, _retried=False):
@@ -41,7 +46,8 @@ def geocode(location, region=None, min_confidence=0.8, _retried=False):
     err = d.get("error")
     if err:
         sug = d.get("suggestion") or {}
-        if err.get("code") == "008" and sug.get("locate") and not _retried:
+        loc = sug.get("locate")  # can be {} rather than a string
+        if err.get("code") == "008" and isinstance(loc, str) and loc and not _retried:
             return geocode(sug["locate"], sug.get("region") or region, min_confidence, True)
         if err.get("code") == "008":
             return None
@@ -53,6 +59,8 @@ def geocode(location, region=None, min_confidence=0.8, _retried=False):
     std = d.get("standard") or {}
     pick = lambda k, alt=None: _clean(std.get(k)) or _clean(d.get(alt or k)) or ""
     conf = float(pick("confidence") or 0)
+    if conf == 0:
+        return None  # confidence 0 means no match, even with coordinates
     return {
         "lat": lat,
         "lon": lon,
