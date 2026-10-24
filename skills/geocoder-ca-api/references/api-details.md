@@ -24,7 +24,7 @@ Endpoint: `https://geocoder.ca/` (GET or POST). Authoritative spec: https://geoc
 | `showpostal=1` | Include the postal code |
 | `getpolygon=1` | With a postal code, include its boundary polygon |
 | `country=canada` / `region=ON` | Restrict or bias to a country or province/state |
-| `strictmode=1` | Return suggestions rather than a best guess on ambiguous input |
+| `strictmode=1` | Return suggestions rather than a best guess on ambiguous input (in testing, a bare `Springfield` still returned one guess) |
 | `id` | Your own transaction id, echoed back |
 
 ## Reverse geocoding
@@ -33,10 +33,10 @@ Endpoint: `https://geocoder.ca/` (GET or POST). Authoritative spec: https://geoc
 |---|---|
 | `latt`, `longt` | Point (latitude first) |
 | `reverse=1` | Reverse lookup |
-| `allna=1` | Search all of North America (required for US points) |
+| `allna=1` | Search all of North America (recommended for US points) |
 | `corner=1` | Include the nearest intersection |
 | `moreinfo=1` | County, metro area and extra context |
-| `pois=1` | Nearby places; refine with `type=`, `keyword=`, `radius=` (metres) |
+| `pois=1` | Nearby places; refine with `type=`, `keyword=`, `radius=` (metres). Returned no place data in testing |
 
 ## Intersections
 
@@ -65,11 +65,11 @@ Always pass `limit` with these and confirm the expected cost with the user first
 | `latt`, `longt` | Strings; empty when there is no match |
 | `postal` | Canadian postal code or US ZIP |
 | `standard.stnumber`, `standard.staddress`, `standard.city`, `standard.prov` | Standardized address |
-| `standard.confidence` | 0–1 as a string; below 0.5 is not returned |
+| `standard.confidence` | 0–1 as a string; values as low as 0.1 are returned, so filter yourself. Postal-code-only lookups score 0.1–0.3 even when valid |
 | `more` | Unused input (unit, PO box) — keep it |
 | `Dissemination_Area.dauid`, `.adauid` | Statistics Canada DA and aggregate DA ids (Canada) |
 | `suggestion` | Present on no-match or ambiguous input |
-| `error.code`, `error.message` | See the error table in SKILL.md |
+| `error.code`, `error.description` | See the error table in SKILL.md. The throttling error (`006`) uses `error.message` instead |
 
 Canadian results can also include Alberta Township System / Dominion Land Survey legal subdivisions (LSD), time zone and telephone area code.
 

@@ -34,7 +34,8 @@ def _call(params, method="GET", retries=1):
         data = r.json()
         err = data.get("error")
         if err:
-            raise GeocoderCaError(err.get("code"), err.get("message"), data)
+            # Most errors use "description"; 006 (throttled) uses "message".
+            raise GeocoderCaError(err.get("code"), err.get("description") or err.get("message"), data)
         return data
     raise GeocoderCaError("006", "Throttled; an auth token is needed")
 

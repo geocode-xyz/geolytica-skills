@@ -17,6 +17,8 @@ function gxyz_call(array $params): array {
     $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
     curl_close($ch);
     if ($status !== 200) { throw new RuntimeException("HTTP $status"); }
+    // Street autocomplete is Latin-1 despite its UTF-8 header.
+    if (!preg_match('//u', $body)) { $body = iconv('ISO-8859-1', 'UTF-8', $body); }
     return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 }
 
@@ -27,7 +29,7 @@ function geocode(string $loc, ?string $region = null, bool $retried = false): ?a
 
     if (!empty($d['error'])) {
         $s = $d['suggestion'] ?? [];
-        if ($d['error']['code'] === '008' && !empty($s['locate']) && !$retried) {
+        if ($d['error']['code'] === '008' && is_string($s['locate'] ?? null) && $s['locate'] !== '' && !$retried) {
             return geocode($s['locate'], $s['region'] ?? $region, true);
         }
         if ($d['error']['code'] === '008') { return null; }
@@ -37,6 +39,8 @@ function geocode(string $loc, ?string $region = null, bool $retried = false): ?a
     $std = $d['standard'] ?? [];
     $get = fn($k, $alt = null) => clean($std[$k] ?? null) ?: clean($d[$alt ?? $k] ?? null);
     if ((float) ($d['latt'] ?? 0) == 0.0) { return null; }
+    // confidence 0 means no match, even with coordinates
+    if ((float) ($get('confidence') ?: 0) == 0.0) { return null; }
     return [
         'lat' => (float) $d['latt'],
         'lon' => (float) $d['longt'],

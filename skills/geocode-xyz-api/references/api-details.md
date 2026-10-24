@@ -43,7 +43,7 @@ Endpoint: `https://geocode.xyz/` (GET or POST). Human docs: https://geocode.xyz/
 
 `region` (required, two-letter), `streetname` (partial street or postcode), optional `cityname`, `geoit=json`.
 
-Response: `standard.street` is an object keyed by suggestion text; each value has `city`, `post`, `street`, `num`, `score` (higher is better). `matches` is the count. The response also contains `error.code = "008"` and a `suggestion` — this is expected for autocomplete.
+Response: `standard.street` is an object keyed by suggestion text; each value has `city`, `post`, `street`, `num`, `score` (higher is better), but `post`, `num` and `street` can be empty (`{}`). `matches` is the count. The response may also contain `error.code = "008"` and a `suggestion` — this is expected for autocomplete. The body is Latin-1 despite a UTF-8 `Content-Type` (decode as UTF-8, fall back to Latin-1), and top-level `latt`/`longt` are meaningless here.
 
 ## Response fields
 
@@ -61,7 +61,8 @@ Response: `standard.street` is an object keyed by suggestion text; each value ha
 | `class` | Road class or speed limit from OSM `maxspeed` |
 | `NearRoad`, `NearRoadDistance` | Nearest road and its distance (km) |
 | `error.code`, `error.description` | See SKILL.md |
-| `suggestion.locate`, `suggestion.region` | Retry hint on no-match |
+| `suggestion.locate`, `suggestion.region` | Retry hint on no-match; `locate` can be an empty object `{}`, so check it is a non-empty string |
+| `confidence` | `"0"` means no match even when `latt`/`longt` are filled in |
 
 <!-- TODO(Geolytica): document the exact JSON container for multiple geoparsing matches (array name and per-match fields). -->
 

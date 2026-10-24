@@ -30,7 +30,8 @@ async function call(params, { method = "GET", retries = 1 } = {}) {
     }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    if (data.error) throw new GeocoderCaError(data.error.code, data.error.message, data);
+    // Most errors use "description"; 006 (throttled) uses "message".
+    if (data.error) throw new GeocoderCaError(data.error.code, data.error.description ?? data.error.message, data);
     return data;
   }
   throw new GeocoderCaError("006", "Throttled; an auth token is needed");

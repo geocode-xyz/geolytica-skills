@@ -25,7 +25,10 @@ sub gca_call {
         }
         die "HTTP $res->{status}\n" unless $res->{success};
         my $d = decode_json($res->{content});
-        die "geocoder.ca $d->{error}{code}: $d->{error}{message}\n" if $d->{error};
+        # Most errors use "description"; 006 (throttled) uses "message".
+        if (my $e = $d->{error}) {
+            die "geocoder.ca $e->{code}: " . ($e->{description} // $e->{message} // '') . "\n";
+        }
         return $d;
     }
     die "geocoder.ca 006: throttled; an auth token is needed\n";

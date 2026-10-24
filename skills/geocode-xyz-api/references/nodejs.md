@@ -13,7 +13,12 @@ async function call(params, method = "GET") {
     ? await fetch(BASE, { method: "POST", body: p })
     : await fetch(`${BASE}?${p}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  // Street autocomplete is Latin-1 despite its UTF-8 header.
+  const buf = await res.arrayBuffer();
+  let text;
+  try { text = new TextDecoder("utf-8", { fatal: true }).decode(buf); }
+  catch { text = new TextDecoder("latin1").decode(buf); }
+  return JSON.parse(text);
 }
 
 export async function geocode(location, region, { minConfidence = 0.8, retried = false } = {}) {
@@ -21,7 +26,8 @@ export async function geocode(location, region, { minConfidence = 0.8, retried =
 
   if (d.error) {
     const s = d.suggestion;
-    if (d.error.code === "008" && s?.locate && !retried) {
+    // suggestion.locate can be {} (truthy in JS), so require a non-empty string.
+    if (d.error.code === "008" && typeof s?.locate === "string" && s.locate && !retried) {
       return geocode(s.locate, s.region || region, { minConfidence, retried: true });
     }
     if (d.error.code === "008") return null;
@@ -35,6 +41,7 @@ export async function geocode(location, region, { minConfidence = 0.8, retried =
   const std = d.standard || {};
   const pick = (k, alt = k) => clean(std[k]) || clean(d[alt]);
   const confidence = parseFloat(pick("confidence") || "0");
+  if (!confidence) return null; // confidence 0 means no match, even with coordinates
   return {
     lat, lon,
     number: pick("stnumber"),
