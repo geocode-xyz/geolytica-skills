@@ -49,7 +49,7 @@ Response: `standard.street` is an object keyed by suggestion text; each value ha
 
 | Field | Meaning |
 |---|---|
-| `latt`, `longt` | Latitude, longitude. In geoparse responses, the centroid (mean) of all matches; each match carries its own `latt`/`longt` |
+| `latt`, `longt` | Latitude, longitude. In geoparse responses, the confidence-weighted centroid of matches at confidence 0.5 or higher (`0.00000` when none reach 0.5); each match carries its own `latt`/`longt` |
 | `elevation`, `timezone` | With `moreinfo=1` |
 | `standard.stnumber`, `.addresst`, `.city`, `.prov`, `.postal`, `.countryname`, `.confidence` | Standardized address (`prov` = country code) |
 | `stnumber`, `staddress`, `city`, `prov`, `countryname`, `confidence` | Same, top-level variant |
