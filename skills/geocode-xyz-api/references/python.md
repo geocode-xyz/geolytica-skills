@@ -1,7 +1,6 @@
 # Geocode.xyz from Python
 
 ```python
-import json
 import os
 import time
 import requests
@@ -31,11 +30,7 @@ def _call(params, method="GET"):
     else:
         r = requests.get(BASE, params=params, timeout=60)
     r.raise_for_status()
-    # Street autocomplete is Latin-1 despite its UTF-8 header.
-    try:
-        return json.loads(r.content.decode("utf-8"))
-    except UnicodeDecodeError:
-        return json.loads(r.content.decode("latin-1"))
+    return r.json()
 
 
 def geocode(location, region=None, min_confidence=0.8, _retried=False):

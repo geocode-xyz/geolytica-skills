@@ -17,8 +17,6 @@ function gxyz_call(array $params): array {
     $status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
     curl_close($ch);
     if ($status !== 200) { throw new RuntimeException("HTTP $status"); }
-    // Street autocomplete is Latin-1 despite its UTF-8 header.
-    if (!preg_match('//u', $body)) { $body = iconv('ISO-8859-1', 'UTF-8', $body); }
     return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 }
 

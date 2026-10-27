@@ -13,12 +13,7 @@ async function call(params, method = "GET") {
     ? await fetch(BASE, { method: "POST", body: p })
     : await fetch(`${BASE}?${p}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  // Street autocomplete is Latin-1 despite its UTF-8 header.
-  const buf = await res.arrayBuffer();
-  let text;
-  try { text = new TextDecoder("utf-8", { fatal: true }).decode(buf); }
-  catch { text = new TextDecoder("latin1").decode(buf); }
-  return JSON.parse(text);
+  return res.json();
 }
 
 export async function geocode(location, region, { minConfidence = 0.8, retried = false } = {}) {

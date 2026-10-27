@@ -20,9 +20,7 @@ sub gxyz_call {
     $p{auth} = $AUTH if $AUTH;
     my $res = $http->post_form($BASE, \%p);
     die "HTTP $res->{status}\n" unless $res->{success};
-    # Street autocomplete is Latin-1 despite its UTF-8 header.
-    return eval { decode_json($res->{content}) }
-        || JSON::PP->new->latin1->decode($res->{content});
+    return decode_json($res->{content});
 }
 
 sub geocode {
