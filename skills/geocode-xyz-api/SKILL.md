@@ -49,7 +49,7 @@ Output: `json=1` (recommended), `geojson=1`, `geoit=XML` or `geoit=CSV`. Omittin
 
 **IP geolocation.** `locate=<IPv4 address>`. The response looks like a full street address (`8.8.8.8` returned a street in Tampa, confidence 0.6), but IP location is city-level at best and wrong for anycast addresses; use only the city and country.
 
-**Geoparse text.** POST `scantext=<text>`; every location found is returned, ordered by confidence, with `MentionIndices` (character offsets in your text) and `matchtype` (street, intersection, locality, landmark, postcode). Add `region=` to cut false positives, `nostrict=1` to include low-confidence matches, `sentiment=1` for sentiment analysis. `MentionIndices` came back as `"132,4"` in one test and `"19"` in another: use the first number as the character offset and don't rely on the rest. City names that appear only inside a street match ("Vienna" in "Albertinaplatz, Vienna") are not returned separately.
+**Geoparse text.** POST `scantext=<text>`; every location found is returned, ordered by confidence, with `MentionIndices` (character offsets in your text) and `matchtype` (street, intersection, locality, landmark, postcode). Add `region=` to cut false positives, `nostrict=1` to include low-confidence matches, `sentiment=1` for sentiment analysis. `MentionIndices` lists the character offsets of the words that matched (e.g. `"11,16,37"` for "1600", "Pennsylvania" and "Washington"); the first is usually where the mention starts, but a house number can be missing ("24 Sussex Dr, Ottawa" gave `"60,71"`, starting at "Sussex"), so widen the span before highlighting text. The top-level `latt`/`longt` of a geoparse response is the centroid (mean) of all matches, by design: it shows where the mentions cluster, which is useful when they are all in one city block or neighbourhood. When matches are far apart it can fall somewhere none of them is (Washington DC + Ottawa averages to upstate New York), so take each location's coordinates from `match[]` and use the centroid only as a cluster indicator. City names that appear only inside a street match ("Vienna" in "Albertinaplatz, Vienna") are not returned separately.
 
 ```bash
 curl -s https://geocode.xyz/ \
@@ -61,7 +61,7 @@ curl -s https://geocode.xyz/ \
 
 ## Interpreting results
 
-- Coordinates are in `latt`/`longt`. Empty or `0.00000` values mean no match.
+- Coordinates are in `latt`/`longt`. Empty or `0.00000` values mean no match. In a geoparse (`scantext`) response, per-location coordinates are in `match[]` and the top-level pair is the centroid of all matches.
 - **`confidence` of `0` also means no match, even when coordinates are present**: reverse geocoding `0,0` (open ocean) returned Rio Tinto, Portugal, with confidence `0`.
 - `confidence` runs 0–1 (1 best) and may be formatted `"1"` or `"1.00"`; compare it as a number. Low-confidence results are returned (0.2 seen in testing). Treat 0.8+ as reliable and show anything lower to the user before relying on it.
 - Landmark names can match a street named after them: `Eiffel Tower, Paris` returned a "1 Eiffel" address in Levallois-Perret (postcode 92300), about 3.7 km from the tower, at confidence 0.8. Check landmark results against the known location.

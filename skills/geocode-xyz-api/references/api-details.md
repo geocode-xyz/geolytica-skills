@@ -49,12 +49,12 @@ Response: `standard.street` is an object keyed by suggestion text; each value ha
 
 | Field | Meaning |
 |---|---|
-| `latt`, `longt` | Latitude, longitude |
+| `latt`, `longt` | Latitude, longitude. In geoparse responses, the centroid (mean) of all matches; each match carries its own `latt`/`longt` |
 | `elevation`, `timezone` | With `moreinfo=1` |
 | `standard.stnumber`, `.addresst`, `.city`, `.prov`, `.postal`, `.countryname`, `.confidence` | Standardized address (`prov` = country code) |
 | `stnumber`, `staddress`, `city`, `prov`, `countryname`, `confidence` | Same, top-level variant |
 | `geocode`, `altgeocode`, `geonumber` | Identifiers of the 10 m × 10 m cell |
-| `MentionIndices`, `matchtype` | Geoparsing: offsets in the input text and match type |
+| `MentionIndices`, `matchtype` | Geoparsing: character offsets of the matched words in the input text (a house number may be omitted) and match type |
 | `inlatt`, `inlongt`, `distance` | Reverse: input point and distance (km) to the result |
 | `poi` | Nearest OpenStreetMap point of interest, with `poidist` (km) |
 | `osmtags`, `adminareas` | OpenStreetMap admin tags / full admin hierarchy |

@@ -44,7 +44,7 @@ Endpoint: `https://geocoder.ca/` (GET or POST). Authoritative spec: https://geoc
 
 ## Geoparsing
 
-`scantext=<text>` (POST for long text). Results in `match[]`, ordered by `confidence` descending, each with `latt`, `longt`, `stnumber`, `staddress`, `city`, `prov`, `country`, `confidence`.
+`scantext=<text>` (POST for long text). Results in `match[]`, ordered by `confidence` descending, each with `latt`, `longt`, `stnumber`, `staddress`, `city`, `prov`, `country`, `confidence`. The top-level `latt`/`longt` is the centroid (mean) of all matches, by design: it indicates where the mentions cluster and is meaningful only when they are close together.
 
 ## Premium functions (billed per item)
 
