@@ -57,7 +57,7 @@ curl -s https://geocode.xyz/ \
   --data 'region=NL' --data 'json=1' --data "auth=$GEOCODE_XYZ_AUTH"
 ```
 
-**Autocomplete streets or postcodes.** `region=DE&streetname=albani&geoit=json` (add `cityname=` to narrow). Suggestions arrive in `standard.street`, keyed by name, each with `city` and `score` (higher is better); `post`, `num` and `street` were empty (`{}`) in testing. These responses may also carry error code `008` "Your request produced the following suggestions" — that is the normal success shape here, not a failure. Two quirks: the body is **Latin-1** although the header says UTF-8 (decode the raw bytes as UTF-8 and fall back to Latin-1, or "Göttingen" becomes `G�ttingen` or crashes a strict decoder), and the top-level `latt`/`longt` hold meaningless huge numbers, so ignore them.
+**Autocomplete streets or postcodes.** `region=DE&streetname=albani&geoit=json` (add `cityname=` to narrow). Suggestions arrive in `standard.street`, keyed by name, each with `city`, `post` (postcode) and `score` (higher is better); `num` and `street` may be empty strings. `matches` is the count, as a string or a number, so convert it. Requests without a key may also carry error code `008` "Your request produced the following suggestions" and a `suggestion` — that is the normal success shape here, not a failure. The top-level `latt`/`longt` are `0.00000` here; there are no coordinates per suggestion, so geocode the chosen one with `locate=` if you need them.
 
 ## Interpreting results
 

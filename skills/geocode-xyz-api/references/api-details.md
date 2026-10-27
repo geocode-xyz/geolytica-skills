@@ -43,7 +43,7 @@ Endpoint: `https://geocode.xyz/` (GET or POST). Human docs: https://geocode.xyz/
 
 `region` (required, two-letter), `streetname` (partial street or postcode), optional `cityname`, `geoit=json`.
 
-Response: `standard.street` is an object keyed by suggestion text; each value has `city`, `post`, `street`, `num`, `score` (higher is better), but `post`, `num` and `street` can be empty (`{}`). `matches` is the count. The response may also contain `error.code = "008"` and a `suggestion` — this is expected for autocomplete. The body is Latin-1 despite a UTF-8 `Content-Type` (decode as UTF-8, fall back to Latin-1), and top-level `latt`/`longt` are meaningless here.
+Response: `standard.street` is an object keyed by suggestion text; each value has `city`, `post` (postcode), `street`, `num` and `score` (higher is better). `num` and `street` may be empty strings. `matches` is the count (a string with a key, a number on the free port). Without a key the response may also contain `error.code = "008"` and a `suggestion` — this is expected for autocomplete. Top-level `latt`/`longt` are `0.00000`; suggestions carry no coordinates.
 
 ## Response fields
 
