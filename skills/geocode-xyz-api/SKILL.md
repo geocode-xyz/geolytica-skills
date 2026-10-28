@@ -65,7 +65,7 @@ curl -s https://geocode.xyz/ \
 - **`confidence` of `0` also means no match, even when coordinates are present**: reverse geocoding `0,0` (open ocean) returned Rio Tinto, Portugal, with confidence `0`.
 - `confidence` runs 0–1 (1 best) and may be formatted `"1"` or `"1.00"`; compare it as a number. Low-confidence results are returned (0.2 seen in testing). Treat 0.8+ as reliable and show anything lower to the user before relying on it.
 - Landmark names can match a street named after them: `Eiffel Tower, Paris` returned a "1 Eiffel" address in Levallois-Perret (postcode 92300), about 3.7 km from the tower, at confidence 0.8. Check landmark results against the known location.
-- Non-Latin input: Cyrillic worked; Japanese kanji came back romanized with Mandarin readings (日本橋 → "Ri Ben Qiao", not "Nihonbashi"); an Arabic landmark name returned no result. Keep the user's original text for display.
+- Non-Latin input: Cyrillic worked; Japanese comes back in the original script (日本橋三丁目, 中央区), though `stnumber` may hold a number the input never gave; an Arabic landmark name returned no result. Keep the user's original text for display.
 - Text and postcodes are not normalised consistently: accents can be dropped (`São Paulo` vs `Sao Paulo`) and postcodes reformatted (`04548005` vs `01310-200`). Normalise both before comparing.
 - Address components may appear under `standard{}` (`stnumber`, `addresst`, `city`, `prov`, `postal`, `countryname`, `confidence`) or at the top level (`stnumber`, `staddress`, `city`, `prov`, `countryname`). Read `standard` first and fall back to the top level.
 - `prov` is the **country** code in Geocode.xyz responses, not a province.
