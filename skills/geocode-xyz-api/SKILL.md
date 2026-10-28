@@ -43,13 +43,13 @@ Output: `json=1` (recommended), `geojson=1`, `geoit=XML` or `geoit=CSV`. Omittin
 
 ## Common tasks
 
-**Forward geocode.** `locate=<address, postcode, landmark or city>`. Add `region=` whenever the country is known: the same postcode or street can exist in several countries (e.g. `04548-005` matches in Luxembourg, Brazil and New Zealand). `region` takes ISO-style two-letter codes — note the UK is `UK`, not `GB` — comma-separated lists (`region=UK,FR`), or `Europe`, `Asia`, `Oceania`, `SouthAmerica`. `citybias=<city,city>` further biases toward named cities.
+**Forward geocode.** `locate=<address, postcode, landmark or city>`. Add `region=` whenever the country is known: the same postcode or street can exist in several countries (e.g. `04548-005` is a valid format in Luxembourg, Brazil and New Zealand; without `region` you get a single low-confidence guess, which in testing was Brazil at 0.2). `region` takes ISO-style two-letter codes — the UK is `UK` (`GB` also worked in testing) — comma-separated lists (`region=UK,FR`), or `Europe`, `Asia`, `Oceania`, `SouthAmerica`. `citybias=<city,city>` further biases toward named cities.
 
 **Reverse geocode.** `locate=<lat>,<lon>` — latitude first. Add `moreinfo=1` for timezone and elevation, or `strictmode=1` to skip admin areas and POI lookup when you only need the address (faster).
 
-**IP geolocation.** `locate=<IPv4 address>`.
+**IP geolocation.** `locate=<IPv4 address>`. The response looks like a full street address (`8.8.8.8` returned a street in Tampa, confidence 0.6), but IP location is city-level at best and wrong for anycast addresses; use only the city and country.
 
-**Geoparse text.** POST `scantext=<text>`; every location found is returned, ordered by confidence, with `MentionIndices` (character offsets in your text) and `matchtype` (street, intersection, locality, landmark, postcode). Add `region=` to cut false positives, `nostrict=1` to include low-confidence matches, `sentiment=1` for sentiment analysis.
+**Geoparse text.** POST `scantext=<text>`; every location found is returned, ordered by confidence, with `MentionIndices` (character offsets in your text) and `matchtype` (street, intersection, locality, landmark, postcode). Add `region=` to cut false positives, `nostrict=1` to include low-confidence matches, `sentiment=1` for sentiment analysis. `MentionIndices` lists the character offsets of the words that matched (e.g. `"57,60,71"` for "24", "Sussex" and "Ottawa" in "24 Sussex Dr, Ottawa"); the first is where the mention starts. Words the geocoder normalises or skips, such as street types ("Dr", "Ave") and directionals ("NW"), are not listed, so extend the span to the last listed word's end when highlighting text. The top-level `latt`/`longt` of a geoparse response is a centroid, by design: the confidence-weighted mean of the matches at confidence 0.5 or higher, or `0.00000,0.00000` when none reach 0.5. It shows where the reliable mentions cluster, which is useful when they are all in one city block or neighbourhood. When matches are far apart it can fall somewhere none of them is (Washington DC + Ottawa gives a point in upstate New York), so take each location's coordinates from `match[]` and use the centroid only as a cluster indicator. City names that appear only inside a street match ("Vienna" in "Albertinaplatz, Vienna") are not returned separately.
 
 ```bash
 curl -s https://geocode.xyz/ \
@@ -57,12 +57,16 @@ curl -s https://geocode.xyz/ \
   --data 'region=NL' --data 'json=1' --data "auth=$GEOCODE_XYZ_AUTH"
 ```
 
-**Autocomplete streets or postcodes.** `region=DE&streetname=albani&geoit=json` (add `cityname=` to narrow). Suggestions arrive in `standard.street`, keyed by name, each with `city`, `post` and `score` (higher is better). These responses also carry error code `008` "Your request produced the following suggestions" — that is the normal success shape here, not a failure.
+**Autocomplete streets or postcodes.** `region=DE&streetname=albani&geoit=json` (add `cityname=` to narrow). Suggestions arrive in `standard.street`, keyed by name, each with `city`, `post` (postcode) and `score` (higher is better); `num` and `street` may be empty strings. `matches` is the count, as a string or a number, so convert it. Requests without a key may also carry error code `008` "Your request produced the following suggestions" and a `suggestion` — that is the normal success shape here, not a failure. The top-level `latt`/`longt` are `0.00000` here; there are no coordinates per suggestion, so geocode the chosen one with `locate=` if you need them.
 
 ## Interpreting results
 
-- Coordinates are in `latt`/`longt`. Empty or `0.00000` values mean no match.
-- `confidence` runs 0–1 (1 best); results under 0.5 are rarely returned. Treat 0.8+ as reliable and show anything lower to the user before relying on it.
+- Coordinates are in `latt`/`longt`. Empty or `0.00000` values mean no match. In a geoparse (`scantext`) response, per-location coordinates are in `match[]` and the top-level pair is the confidence-weighted centroid of matches at 0.5 or higher (`0.00000` when there are none).
+- **`confidence` of `0` also means no match, even when coordinates are present**: reverse geocoding `0,0` (open ocean) returned Rio Tinto, Portugal, with confidence `0`.
+- `confidence` runs 0–1 (1 best) and may be formatted `"1"` or `"1.00"`; compare it as a number. Low-confidence results are returned (0.2 seen in testing). Treat 0.8+ as reliable and show anything lower to the user before relying on it.
+- Landmark names can match a street named after them: `Eiffel Tower, Paris` returned a "1 Eiffel" address in Levallois-Perret (postcode 92300), about 3.7 km from the tower, at confidence 0.8. Check landmark results against the known location.
+- Non-Latin input: Cyrillic worked; Japanese kanji came back romanized with Mandarin readings (日本橋 → "Ri Ben Qiao", not "Nihonbashi"); an Arabic landmark name returned no result. Keep the user's original text for display.
+- Text and postcodes are not normalised consistently: accents can be dropped (`São Paulo` vs `Sao Paulo`) and postcodes reformatted (`04548005` vs `01310-200`). Normalise both before comparing.
 - Address components may appear under `standard{}` (`stnumber`, `addresst`, `city`, `prov`, `postal`, `countryname`, `confidence`) or at the top level (`stnumber`, `staddress`, `city`, `prov`, `countryname`). Read `standard` first and fall back to the top level.
 - `prov` is the **country** code in Geocode.xyz responses, not a province.
 - Empty fields can come back as an empty object `{}` instead of an empty string; normalise them before writing CSV or databases.
@@ -71,7 +75,7 @@ curl -s https://geocode.xyz/ \
 
 ## Errors and suggestions
 
-JSON errors look like `{"error": {"code": "008", "description": "..."}, "suggestion": {"locate": "...", "region": "AU"}}` — note the key is `description`, unlike Geocoder.ca's `message`.
+JSON errors look like `{"error": {"code": "008", "description": "..."}, "suggestion": {"locate": "...", "region": "AU"}}` — the text is in `description`. `suggestion.locate` can be an empty object `{}` (seen for nonsense input and an Arabic place name), so only retry when it is a non-empty string.
 
 | Code | Meaning | What to do |
 |---|---|---|
@@ -80,7 +84,7 @@ JSON errors look like `{"error": {"code": "008", "description": "..."}, "suggest
 | 005 | Malformed postal code | Fix the format or drop it from `locate` |
 | 006 | Throttled | Back off; suggest a key |
 | 007 | Invalid query | Check parameters |
-| 008 | No results | If `suggestion` is present, retry once with `suggestion.locate` and `suggestion.region` |
+| 008 | No results | If `suggestion.locate` is a non-empty string, retry once with it and `suggestion.region` |
 
 Retrying the suggestion with its region usually succeeds; do it at most once per input.
 

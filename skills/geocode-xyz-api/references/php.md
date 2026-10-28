@@ -27,7 +27,7 @@ function geocode(string $loc, ?string $region = null, bool $retried = false): ?a
 
     if (!empty($d['error'])) {
         $s = $d['suggestion'] ?? [];
-        if ($d['error']['code'] === '008' && !empty($s['locate']) && !$retried) {
+        if ($d['error']['code'] === '008' && is_string($s['locate'] ?? null) && $s['locate'] !== '' && !$retried) {
             return geocode($s['locate'], $s['region'] ?? $region, true);
         }
         if ($d['error']['code'] === '008') { return null; }
@@ -37,6 +37,8 @@ function geocode(string $loc, ?string $region = null, bool $retried = false): ?a
     $std = $d['standard'] ?? [];
     $get = fn($k, $alt = null) => clean($std[$k] ?? null) ?: clean($d[$alt ?? $k] ?? null);
     if ((float) ($d['latt'] ?? 0) == 0.0) { return null; }
+    // confidence 0 means no match, even with coordinates
+    if ((float) ($get('confidence') ?: 0) == 0.0) { return null; }
     return [
         'lat' => (float) $d['latt'],
         'lon' => (float) $d['longt'],

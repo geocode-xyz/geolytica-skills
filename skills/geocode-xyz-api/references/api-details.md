@@ -43,25 +43,26 @@ Endpoint: `https://geocode.xyz/` (GET or POST). Human docs: https://geocode.xyz/
 
 `region` (required, two-letter), `streetname` (partial street or postcode), optional `cityname`, `geoit=json`.
 
-Response: `standard.street` is an object keyed by suggestion text; each value has `city`, `post`, `street`, `num`, `score` (higher is better). `matches` is the count. The response also contains `error.code = "008"` and a `suggestion` — this is expected for autocomplete.
+Response: `standard.street` is an object keyed by suggestion text; each value has `city`, `post` (postcode), `street`, `num` and `score` (higher is better). `num` and `street` may be empty strings. `matches` is the count (a string with a key, a number on the free port). Without a key the response may also contain `error.code = "008"` and a `suggestion` — this is expected for autocomplete. Top-level `latt`/`longt` are `0.00000`; suggestions carry no coordinates.
 
 ## Response fields
 
 | Field | Meaning |
 |---|---|
-| `latt`, `longt` | Latitude, longitude |
+| `latt`, `longt` | Latitude, longitude. In geoparse responses, the confidence-weighted centroid of matches at confidence 0.5 or higher (`0.00000` when none reach 0.5); each match carries its own `latt`/`longt` |
 | `elevation`, `timezone` | With `moreinfo=1` |
 | `standard.stnumber`, `.addresst`, `.city`, `.prov`, `.postal`, `.countryname`, `.confidence` | Standardized address (`prov` = country code) |
 | `stnumber`, `staddress`, `city`, `prov`, `countryname`, `confidence` | Same, top-level variant |
 | `geocode`, `altgeocode`, `geonumber` | Identifiers of the 10 m × 10 m cell |
-| `MentionIndices`, `matchtype` | Geoparsing: offsets in the input text and match type |
+| `MentionIndices`, `matchtype` | Geoparsing: character offsets of the matched words in the input text (the first is the mention's start) and match type |
 | `inlatt`, `inlongt`, `distance` | Reverse: input point and distance (km) to the result |
 | `poi` | Nearest OpenStreetMap point of interest, with `poidist` (km) |
 | `osmtags`, `adminareas` | OpenStreetMap admin tags / full admin hierarchy |
 | `class` | Road class or speed limit from OSM `maxspeed` |
 | `NearRoad`, `NearRoadDistance` | Nearest road and its distance (km) |
 | `error.code`, `error.description` | See SKILL.md |
-| `suggestion.locate`, `suggestion.region` | Retry hint on no-match |
+| `suggestion.locate`, `suggestion.region` | Retry hint on no-match; `locate` can be an empty object `{}`, so check it is a non-empty string |
+| `confidence` | `"0"` means no match even when `latt`/`longt` are filled in |
 
 <!-- TODO(Geolytica): document the exact JSON container for multiple geoparsing matches (array name and per-match fields). -->
 

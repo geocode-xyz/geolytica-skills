@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Agent skills for the Geocoder.ca and Geocode.xyz geocoding APIs",
-    "version": "0.1.1"
+    "version": "0.1.2"
   },
   "plugins": [
     {
       "name": "geolytica",
       "source": "./",
       "description": "Geocode, reverse geocode, validate and geoparse addresses with Geocoder.ca (Canada/USA) and Geocode.xyz (worldwide), plus a Canadian address autocomplete widget",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": { "name": "Geolytica Inc." },
       "homepage": "https://geocoder.ca",
       "repository": "https://github.com/geocode-xyz/geolytica-skills",
