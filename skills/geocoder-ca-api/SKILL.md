@@ -26,7 +26,7 @@ The raw `curl` examples below are for code you write into the user's project, no
 
 - Pass the user's token as `auth=TOKEN`. Read it from the `GEOCODER_CA_AUTH` environment variable if set; never hard-code, print or commit it. The bundled script does this for you.
 - Without a token, requests use the free throttled port. Keep to one request at a time with at least a one-second pause, and expect HTTP 429 (error code `006`) if you go faster. On 429, wait (honour `Retry-After` if present) and retry once; if it persists, tell the user a token is needed (https://geocoder.ca/pricing).
-- With a token, one successful lookup costs one credit. `showaddrs`, `batchpostal`, `postalinpolygon` and `censusdatafromdauid` bill per returned item, so always set `limit` and confirm with the user before large premium requests.
+- With a token, every request costs one credit, including requests that return an error such as `008` (no results); only a failure inside the geocoder itself is not billed. Clean obviously bad input (empty fields, malformed postal codes) before sending it, and don't resend a request unchanged after a `005`, `007` or `008` error. `showaddrs`, `batchpostal`, `postalinpolygon` and `censusdatafromdauid` bill per returned item, so always set `limit` and confirm with the user before large premium requests.
 
 ## Always request JSON
 
