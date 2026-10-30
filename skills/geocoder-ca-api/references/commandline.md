@@ -51,4 +51,4 @@ while IFS= read -r line || [[ -n "$line" ]]; do
 done < "$1"
 ```
 
-Stop the loop on error `002` (out of credits) or `003` (bad token) rather than writing thousands of failed rows.
+Stop the loop on error `002` (out of credits) or `003` (bad token) rather than writing thousands of failed rows. Every request costs a credit, including those that return an error, so drop empty or obviously invalid rows before the loop.
