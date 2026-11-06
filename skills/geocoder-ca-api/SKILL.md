@@ -65,7 +65,7 @@ curl -sG 'https://geocoder.ca/' \
 
 ## Interpreting results
 
-- Empty `latt`/`longt` means no match. Low-confidence results **are** returned (0.1–0.3 seen in testing), so filter on `confidence` yourself; the response may also contain suggestions.
+- Empty `latt`/`longt` means no match. Results with confidence below 0.5 are rarely returned, but they can be (as low as 0.1 in testing), so filter on `confidence` yourself; the response may contain a suggestion instead.
 - Treat `confidence` of 0.8 or higher as reliable. Between 0.5 and 0.8, show the matched address to the user before relying on it. Below 0.5, treat the result as no match unless it is a postal-code lookup (next point).
 - Postal-code-only lookups (`locate=K1A0A6`) return the code's centroid with low confidence (0.1–0.3) even when the code is valid. Judge them by whether the returned `postal` equals the input, not by `confidence`, and ignore any `standard.stnumber` (`locate=k2p 1s4` came back with `stnumber: "1"`).
 - Geocoder.ca does not reject addresses outside Canada and the USA: `10 Downing St, London` returned an invented "10 Street St, London, ON" (confidence 0.2) whose coordinates are about 150 km from London, ON. Route other countries to the `geocode-xyz-api` skill.
