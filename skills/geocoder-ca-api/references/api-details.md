@@ -65,7 +65,7 @@ Always pass `limit` with these and confirm the expected cost with the user first
 | `latt`, `longt` | Strings; empty when there is no match |
 | `postal` | Canadian postal code or US ZIP |
 | `standard.stnumber`, `standard.staddress`, `standard.city`, `standard.prov` | Standardized address |
-| `standard.confidence` | 0–1 as a string; values as low as 0.1 are returned, so filter yourself. Postal-code-only lookups score 0.1–0.3 even when valid |
+| `standard.confidence` | 0–1 as a string (1 = best). Results below 0.5 are rarely returned, but values as low as 0.1 can be, so filter yourself. Valid postal-code-only lookups score 1.0 |
 | `more` | Unused input (unit, PO box) — keep it |
 | `Dissemination_Area.dauid`, `.adauid` | Statistics Canada DA and aggregate DA ids (Canada) |
 | `suggestion` | Present on no-match or ambiguous input |
