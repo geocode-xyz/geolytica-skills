@@ -66,10 +66,10 @@ curl -sG 'https://geocoder.ca/' \
 ## Interpreting results
 
 - Empty `latt`/`longt` means no match. Results with confidence below 0.5 are rarely returned, but they can be (as low as 0.1 in testing), so filter on `confidence` yourself; the response may contain a suggestion instead.
-- Treat `confidence` of 0.8 or higher as reliable. Between 0.5 and 0.8, show the matched address to the user before relying on it. Below 0.5, treat the result as no match unless it is a postal-code lookup (next point).
-- Postal-code-only lookups (`locate=K1A0A6`) return the code's centroid with low confidence (0.1–0.3) even when the code is valid. Judge them by whether the returned `postal` equals the input, not by `confidence`, and ignore any `standard.stnumber` (`locate=k2p 1s4` came back with `stnumber: "1"`).
-- Geocoder.ca does not reject addresses outside Canada and the USA: `10 Downing St, London` returned an invented "10 Street St, London, ON" (confidence 0.2) whose coordinates are about 150 km from London, ON. Route other countries to the `geocode-xyz-api` skill.
-- Empty fields can come back as an empty object `{}` instead of `""` (e.g. `standard.stnumber` on a postal-code lookup); normalise them before storing.
+- Treat `confidence` of 0.8 or higher as reliable. Between 0.5 and 0.8, show the matched address to the user before relying on it. Below 0.5, treat the result as no match.
+- Postal-code-only lookups (`locate=K1A0A6`, `locate=k2p 1s4`) return the code's point at confidence 1.0 when the code is valid, with no house number. A rural code can also return the road it lies on in `staddress` (`T0B 3M0` gives Range Road 225). Check that the returned `postal` equals the input.
+- Geocoder.ca covers Canada and the USA only: `10 Downing St, London` returns 008 (no match). Route other countries to the `geocode-xyz-api` skill.
+- Empty fields can come back as an empty object `{}` instead of `""`; normalise them before storing.
 - `more` holds input the geocoder did not use (unit numbers, PO boxes); keep it rather than discarding it.
 - Ambiguous place names (e.g. a city with no province or state) can resolve to the wrong country. Always include the province/state, or pass `country=canada` or `region=ON`. `strictmode=1` is documented to return suggestions instead of a guess, but in testing `locate=Springfield` returned Springfield, MO at confidence 0.8 with or without it, and no `101` error: don't rely on the API to flag ambiguity.
 - Canadian postal codes are `A1A1A1`; accept user input with or without the space and in any case, but send it uppercase.
